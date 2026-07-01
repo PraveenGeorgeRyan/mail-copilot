@@ -22,8 +22,16 @@ export function FilterBar() {
   useEffect(() => setText(filters.text ?? ""), [filters.text]);
   useEffect(() => setFrom(filters.from ?? ""), [filters.from]);
 
-  const commitText = () => setFilters({ text: text.trim() || undefined });
-  const commitFrom = () => setFilters({ from: from.trim() || undefined });
+  // Only commit real changes — setFilters closes the open email (a new
+  // search should show the list), so a no-op blur must not trigger it.
+  const commitText = () => {
+    const next = text.trim() || undefined;
+    if (next !== filters.text) setFilters({ text: next });
+  };
+  const commitFrom = () => {
+    const next = from.trim() || undefined;
+    if (next !== filters.from) setFilters({ from: next });
+  };
   const onEnter =
     (commit: () => void) => (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") commit();

@@ -19,6 +19,8 @@ export interface EmailSummary {
 
 export interface EmailDetail extends EmailSummary {
   cc: string | null;
+  /** Parsed Reply-To address (email only) when the sender set one */
+  replyTo: string | null;
   /** Sanitized HTML body, ready to render */
   html: string | null;
   /** Plain-text body fallback */

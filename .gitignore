@@ -34,7 +34,7 @@ yarn-error.log*
 .env*
 !.env.example
 
-# local AI/planning docs (kept out of the repo)
+# local docs (kept out of the repo)
 .context/
 CLAUDE.md
 AGENTS.md

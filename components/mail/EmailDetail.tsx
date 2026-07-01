@@ -46,7 +46,8 @@ export function EmailDetail({ id }: { id: string }) {
   const onReply = () => {
     openCompose(
       {
-        to: data.from.email,
+        // Honor Reply-To when the sender set one (support desks, newsletters).
+        to: data.replyTo ?? data.from.email,
         subject: replySubject(data.subject),
       },
       data.messageIdHeader

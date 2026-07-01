@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 // Imported for the module augmentation below — TS can only extend a module it has seen.
 import type { JWT as _JWT } from "next-auth/jwt";
+import { freshAccessToken } from "@/lib/google-token";
 
 /**
  * Auth.js v5 configuration.
@@ -9,7 +10,11 @@ import type { JWT as _JWT } from "next-auth/jwt";
  * The app authenticates with "Sign in with Google" (OAuth). Google returns:
  *  - an access token (valid ~1h) used to call the Gmail API
  *  - a refresh token used to mint new access tokens silently
- * Both live inside the encrypted JWT session cookie — no database needed.
+ * Both live ONLY inside the encrypted JWT session cookie — the session
+ * callback deliberately never copies them onto the Session object, because
+ * everything returned there is served to browser JavaScript via
+ * GET /api/auth/session. Server code reads the JWT directly
+ * (see lib/gmail/client.ts).
  *
  * Scopes: gmail.modify covers reading, searching (q=), and marking
  * read/unread; gmail.send covers sending. Requested up-front on first
@@ -25,7 +30,6 @@ const SCOPES = [
 
 declare module "next-auth" {
   interface Session {
-    accessToken?: string;
     error?: "RefreshTokenError";
   }
 }
@@ -64,43 +68,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         };
       }
 
-      // Access token still valid (with a 60s safety margin)? Keep it.
-      if (token.expiresAt && Date.now() < (token.expiresAt - 60) * 1000) {
-        return token;
-      }
-
-      // Expired: exchange the refresh token for a new access token.
-      if (!token.refreshToken) {
+      // Reuses the current token while valid; refreshes (with caching +
+      // in-flight dedup) when expired. Null means the refresh grant failed —
+      // non-retryable (revoked / 7-day testing expiry) → force re-login.
+      const fresh = await freshAccessToken(token);
+      if (!fresh) {
         return { ...token, error: "RefreshTokenError" as const };
       }
-      try {
-        const response = await fetch("https://oauth2.googleapis.com/token", {
-          method: "POST",
-          body: new URLSearchParams({
-            client_id: process.env.AUTH_GOOGLE_ID!,
-            client_secret: process.env.AUTH_GOOGLE_SECRET!,
-            grant_type: "refresh_token",
-            refresh_token: token.refreshToken,
-          }),
-        });
-        const refreshed = await response.json();
-        if (!response.ok) throw refreshed;
-
-        return {
-          ...token,
-          accessToken: refreshed.access_token,
-          expiresAt: Math.floor(Date.now() / 1000 + refreshed.expires_in),
-          // Google often omits the refresh token on renewal — keep the old one.
-          refreshToken: refreshed.refresh_token ?? token.refreshToken,
-          error: undefined,
-        };
-      } catch {
-        // invalid_grant etc. is non-retryable: surface it so the UI forces re-login.
-        return { ...token, error: "RefreshTokenError" as const };
-      }
+      return {
+        ...token,
+        accessToken: fresh.accessToken,
+        expiresAt: fresh.expiresAt,
+        error: undefined,
+      };
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
+      // Only the error flag crosses to the client — never tokens.
       session.error = token.error;
       return session;
     },

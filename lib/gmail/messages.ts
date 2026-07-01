@@ -4,7 +4,7 @@ import type {
   EmailListResponse,
   MailFolder,
 } from "@/lib/types";
-import { extractBody, headerValue, toEmailSummary } from "./parse";
+import { extractBody, headerValue, parseAddress, toEmailSummary } from "./parse";
 import { sanitizeEmailHtml } from "./sanitize";
 
 const LIST_HEADERS = ["From", "To", "Subject", "Date"];
@@ -53,9 +53,13 @@ export async function getMessageDetail(
   const headers = msg.payload?.headers;
   const { html, text } = extractBody(msg.payload);
 
+  const replyToHeader = headerValue(headers, "Reply-To");
+
   return {
     ...toEmailSummary(msg),
     cc: headerValue(headers, "Cc") || null,
+    // Parsed server-side so client components never import Buffer-using code.
+    replyTo: replyToHeader ? parseAddress(replyToHeader).email : null,
     html: html ? sanitizeEmailHtml(html) : null,
     text,
     messageIdHeader: headerValue(headers, "Message-ID") || null,

