@@ -20,6 +20,8 @@ export function buildGmailQuery(filters: Filters): string {
   if (filters.text) parts.push(quoteTerm(filters.text));
   if (filters.after) parts.push(`after:${toGmailDate(filters.after)}`);
   if (filters.before) parts.push(`before:${toGmailDate(filters.before)}`);
+  // Raw Gmail operators pass through untouched (assistant escape hatch).
+  if (filters.raw) parts.push(filters.raw.trim());
 
   return parts.join(" ");
 }
@@ -44,6 +46,7 @@ export function describeFilters(filters: Filters): string {
   if (filters.text) bits.push(`matching "${filters.text}"`);
   if (filters.after) bits.push(`after ${filters.after}`);
   if (filters.before) bits.push(`before ${filters.before}`);
+  if (filters.raw) bits.push(`Gmail query: ${filters.raw}`);
   return bits.length ? bits.join(", ") : "no filters";
 }
 
@@ -54,6 +57,7 @@ export function hasActiveFilters(filters: Filters): boolean {
       filters.subject ||
       filters.text ||
       filters.after ||
-      filters.before
+      filters.before ||
+      filters.raw
   );
 }

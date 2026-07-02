@@ -1,8 +1,11 @@
 "use client";
 
 import { signOut } from "next-auth/react";
+import { CopilotKitProvider } from "@copilotkit/react-core/v2";
+import "@copilotkit/react-core/v2/styles.css";
 import { useMailSync } from "@/hooks/use-sync";
 import { useMailStore } from "@/store/mail-store";
+import { AssistantPanel } from "@/components/assistant/AssistantPanel";
 import { FolderNav } from "./FolderNav";
 import { FilterBar } from "./FilterBar";
 import { EmailList } from "./EmailList";
@@ -22,6 +25,7 @@ export function MailApp({
   const openEmailId = useMailStore((s) => s.openEmailId);
 
   return (
+    <CopilotKitProvider runtimeUrl="/api/copilotkit">
     <div className="flex h-screen flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
       <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-900">
         <div className="flex items-center gap-2.5">
@@ -67,6 +71,8 @@ export function MailApp({
       </div>
 
       <ComposeModal />
+      <AssistantPanel userEmail={userEmail} userName={userName} />
     </div>
+    </CopilotKitProvider>
   );
 }

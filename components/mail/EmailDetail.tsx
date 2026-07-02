@@ -3,9 +3,8 @@
 import { useEffect } from "react";
 import { useEmailDetail, useMarkRead } from "@/hooks/use-mailbox";
 import { useMailStore } from "@/store/mail-store";
-import { formatFullDate, initials } from "@/lib/format";
+import { formatFullDate, forwardQuote, initials } from "@/lib/format";
 import { forwardSubject, replySubject } from "@/lib/gmail/mime";
-import type { EmailDetail as EmailDetailType } from "@/lib/types";
 import { ForwardIcon, ReplyIcon, XIcon } from "./icons";
 
 export function EmailDetail({ id }: { id: string }) {
@@ -133,18 +132,4 @@ export function EmailDetail({ id }: { id: string }) {
       )}
     </article>
   );
-}
-
-function forwardQuote(email: EmailDetailType): string {
-  return [
-    "",
-    "",
-    "---------- Forwarded message ----------",
-    `From: ${email.from.name} <${email.from.email}>`,
-    `Date: ${formatFullDate(email.date)}`,
-    `Subject: ${email.subject}`,
-    `To: ${email.to}`,
-    "",
-    email.text ?? email.snippet,
-  ].join("\n");
 }

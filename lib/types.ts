@@ -42,6 +42,8 @@ export interface Filters {
   after?: string;
   /** YYYY-MM-DD (exclusive) */
   before?: string;
+  /** Raw Gmail query appended verbatim — AI escape hatch (e.g. "has:attachment") */
+  raw?: string;
 }
 
 export interface ComposeDraft {

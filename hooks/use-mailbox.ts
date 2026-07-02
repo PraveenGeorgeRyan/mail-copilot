@@ -16,15 +16,27 @@ import type { EmailDetail, EmailListResponse } from "@/lib/types";
  * assistant — automatically refetches the right Gmail query.
  */
 
+/** Plain fetchers — shared by the React Query hooks AND the AI tool handlers,
+ *  so both go through the same cache entries. */
+export function fetchEmailList(
+  folder: string,
+  q: string
+): Promise<EmailListResponse> {
+  return fetchJson(
+    `/api/mail/messages?folder=${folder}&q=${encodeURIComponent(q)}`
+  );
+}
+
+export function fetchEmailDetail(id: string): Promise<EmailDetail> {
+  return fetchJson(`/api/mail/messages/${id}`);
+}
+
 export function useEmailList() {
   const filters = useMailStore((s) => s.filters);
   const q = buildGmailQuery(filters);
   return useQuery<EmailListResponse>({
     queryKey: ["messages", filters.folder, q],
-    queryFn: () =>
-      fetchJson(
-        `/api/mail/messages?folder=${filters.folder}&q=${encodeURIComponent(q)}`
-      ),
+    queryFn: () => fetchEmailList(filters.folder, q),
     staleTime: 10_000,
   });
 }
@@ -32,7 +44,7 @@ export function useEmailList() {
 export function useEmailDetail(id: string | null) {
   return useQuery<EmailDetail>({
     queryKey: ["message", id],
-    queryFn: () => fetchJson(`/api/mail/messages/${id}`),
+    queryFn: () => fetchEmailDetail(id!),
     enabled: id !== null,
     staleTime: 5 * 60_000,
   });

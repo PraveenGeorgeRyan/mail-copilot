@@ -28,6 +28,28 @@ export function formatFullDate(iso: string): string {
   });
 }
 
+/** Quoted original message for forwards — shared by the UI button and the AI tool. */
+export function forwardQuote(email: {
+  from: { name: string; email: string };
+  to: string;
+  subject: string;
+  date: string;
+  text: string | null;
+  snippet: string;
+}): string {
+  return [
+    "",
+    "",
+    "---------- Forwarded message ----------",
+    `From: ${email.from.name} <${email.from.email}>`,
+    `Date: ${formatFullDate(email.date)}`,
+    `Subject: ${email.subject}`,
+    `To: ${email.to}`,
+    "",
+    email.text ?? email.snippet,
+  ].join("\n");
+}
+
 export function initials(name: string, email: string): string {
   const source = name || email;
   const words = source.trim().split(/\s+/);
