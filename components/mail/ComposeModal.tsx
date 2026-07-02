@@ -14,6 +14,7 @@ export function ComposeModal() {
   const updateDraft = useMailStore((s) => s.updateDraft);
   const closeCompose = useMailStore((s) => s.closeCompose);
   const setComposeAnimating = useMailStore((s) => s.setComposeAnimating);
+  const assistantOpen = useMailStore((s) => s.assistantOpen);
   const send = useSendEmail();
 
   if (!compose.open) return null;
@@ -28,7 +29,11 @@ export function ComposeModal() {
       // Clicking anywhere in the card while the assistant is typing snaps
       // the animation to the finished draft — never fight the user.
       onMouseDownCapture={() => compose.animating && setComposeAnimating(false)}
-      className="fixed bottom-4 right-4 z-40 flex w-[min(560px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900"
+      // When the assistant panel is open, the card slides left of it so the
+      // two never overlap (panel is 380px wide + 1rem gap).
+      className={`fixed bottom-4 z-40 flex w-[min(560px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900 ${
+        assistantOpen ? "right-99" : "right-4"
+      }`}
     >
       <div className="flex items-center justify-between bg-zinc-100 px-4 py-2.5 dark:bg-zinc-800">
         <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">

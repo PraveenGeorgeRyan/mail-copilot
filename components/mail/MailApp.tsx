@@ -23,6 +23,8 @@ export function MailApp({
   // Starts the 15s incremental-sync poll for the whole app.
   useMailSync();
   const openEmailId = useMailStore((s) => s.openEmailId);
+  const assistantOpen = useMailStore((s) => s.assistantOpen);
+  const toggleAssistant = useMailStore((s) => s.toggleAssistant);
 
   return (
     <CopilotKitProvider runtimeUrl="/api/copilotkit">
@@ -42,6 +44,17 @@ export function MailApp({
             {userEmail}
           </span>
           <button
+            onClick={toggleAssistant}
+            className={`rounded-lg border px-3 py-1.5 text-sm transition ${
+              assistantOpen
+                ? "border-indigo-300 bg-indigo-50 font-medium text-indigo-700 dark:border-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
+                : "border-zinc-200 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            }`}
+            title="Toggle the AI assistant panel"
+          >
+            ✦ Assistant
+          </button>
+          <button
             onClick={() => signOut()}
             className="rounded-lg border border-zinc-200 px-3 py-1.5 text-sm text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
@@ -53,7 +66,7 @@ export function MailApp({
       <div className="flex flex-1 overflow-hidden">
         <FolderNav />
 
-        <section className="flex w-[420px] shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+        <section className="flex w-105 shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
           <FilterBar />
           <EmailList />
         </section>
@@ -68,10 +81,15 @@ export function MailApp({
             </div>
           )}
         </section>
+
+        {assistantOpen && (
+          <aside className="w-95 shrink-0 border-l border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+            <AssistantPanel userEmail={userEmail} userName={userName} />
+          </aside>
+        )}
       </div>
 
       <ComposeModal />
-      <AssistantPanel userEmail={userEmail} userName={userName} />
     </div>
     </CopilotKitProvider>
   );

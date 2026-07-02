@@ -32,7 +32,10 @@ interface MailStore {
   compose: ComposeState;
   /** Gmail history cursor for incremental sync */
   historyId: string | null;
+  /** Whether the embedded assistant panel is visible */
+  assistantOpen: boolean;
 
+  toggleAssistant: () => void;
   navigate: (folder: MailFolder) => void;
   setFilters: (partial: Partial<Filters>) => void;
   clearFilters: () => void;
@@ -50,6 +53,9 @@ export const useMailStore = create<MailStore>()((set) => ({
   openEmailId: null,
   compose: { open: false, draft: EMPTY_DRAFT, animating: false },
   historyId: null,
+  assistantOpen: true,
+
+  toggleAssistant: () => set((s) => ({ assistantOpen: !s.assistantOpen })),
 
   navigate: (folder) =>
     set({ filters: { folder }, openEmailId: null }),
