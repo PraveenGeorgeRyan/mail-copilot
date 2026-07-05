@@ -19,6 +19,8 @@ const EMPTY_DRAFT: ComposeDraft = { to: "", cc: "", subject: "", body: "" };
 
 interface ComposeState {
   open: boolean;
+  /** Collapsed to a title bar (Gmail-style), keeping the draft intact */
+  minimized: boolean;
   draft: ComposeDraft;
   /** True while the typewriter fill animation is running (assistant compose) */
   animating: boolean;
@@ -44,6 +46,7 @@ interface MailStore {
   openCompose: (draft?: Partial<ComposeDraft>, replyTo?: ReplyContext) => void;
   updateDraft: (partial: Partial<ComposeDraft>) => void;
   setComposeAnimating: (animating: boolean) => void;
+  setComposeMinimized: (minimized: boolean) => void;
   closeCompose: () => void;
   setHistoryId: (historyId: string) => void;
 }
@@ -51,7 +54,7 @@ interface MailStore {
 export const useMailStore = create<MailStore>()((set) => ({
   filters: { folder: "inbox" },
   openEmailId: null,
-  compose: { open: false, draft: EMPTY_DRAFT, animating: false },
+  compose: { open: false, minimized: false, draft: EMPTY_DRAFT, animating: false },
   historyId: null,
   assistantOpen: true,
 
@@ -78,6 +81,7 @@ export const useMailStore = create<MailStore>()((set) => ({
     set({
       compose: {
         open: true,
+        minimized: false,
         draft: { ...EMPTY_DRAFT, ...draft },
         animating: false,
         replyTo,
@@ -92,9 +96,17 @@ export const useMailStore = create<MailStore>()((set) => ({
   setComposeAnimating: (animating) =>
     set((s) => ({ compose: { ...s.compose, animating } })),
 
+  setComposeMinimized: (minimized) =>
+    set((s) => ({ compose: { ...s.compose, minimized } })),
+
   closeCompose: () =>
     set((s) => ({
-      compose: { open: false, draft: s.compose.draft, animating: false },
+      compose: {
+        open: false,
+        minimized: false,
+        draft: s.compose.draft,
+        animating: false,
+      },
     })),
 
   setHistoryId: (historyId) => set({ historyId }),

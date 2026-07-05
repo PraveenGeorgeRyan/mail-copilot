@@ -68,18 +68,28 @@ export function MailApp({
       <div className="flex flex-1 overflow-hidden">
         <FolderNav />
 
-        <section className="flex w-105 shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+        <section className="flex w-100 shrink-0 flex-col border-r border-zinc-200 bg-white 2xl:w-md dark:border-zinc-800 dark:bg-zinc-900">
           <FilterBar />
           <EmailList />
         </section>
 
-        <section className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
+        <section className="min-w-0 flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
           {openEmailId ? (
             <EmailDetail id={openEmailId} />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-zinc-400 dark:text-zinc-600">
-              <MailOpenIcon className="h-10 w-10" />
-              <p className="text-sm">Select an email to read it here</p>
+            <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-600">
+                <MailOpenIcon className="h-7 w-7" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
+                  Nothing open yet
+                </p>
+                <p className="text-sm text-zinc-400 dark:text-zinc-500">
+                  Pick an email from the list
+                  {assistantOpen ? " or ask the assistant to find one." : "."}
+                </p>
+              </div>
             </div>
           )}
         </section>

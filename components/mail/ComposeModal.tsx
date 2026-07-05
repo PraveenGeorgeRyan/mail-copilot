@@ -2,22 +2,64 @@
 
 import { useMailStore } from "@/store/mail-store";
 import { draftToPayload, useSendEmail } from "@/hooks/use-send";
-import { SendIcon, XIcon } from "./icons";
+import { ExpandIcon, MinimizeIcon, SendIcon, XIcon } from "./icons";
 
 /**
- * Gmail-style compose card, bottom-right. Fields are controlled by the
- * store draft — which is exactly what lets the AI assistant fill them
- * visibly (Day 2 adds the typewriter animation on top of the same state).
+ * Gmail-style compose card, bottom-right. Fields are controlled by the store
+ * draft — which is what lets the AI assistant fill them visibly. It has two
+ * states: expanded (the full card) and minimized (a slim title bar), so the
+ * user can tuck it away to read mail without losing the draft.
  */
 export function ComposeModal() {
   const compose = useMailStore((s) => s.compose);
   const updateDraft = useMailStore((s) => s.updateDraft);
   const closeCompose = useMailStore((s) => s.closeCompose);
   const setComposeAnimating = useMailStore((s) => s.setComposeAnimating);
+  const setComposeMinimized = useMailStore((s) => s.setComposeMinimized);
   const assistantOpen = useMailStore((s) => s.assistantOpen);
   const send = useSendEmail();
 
   if (!compose.open) return null;
+
+  // Sits left of the assistant panel (380px) + a 16px gap when it's open,
+  // so the two never overlap.
+  const rightOffset = assistantOpen ? "right-99" : "right-4";
+  const title = compose.replyTo ? "Reply" : "New message";
+
+  if (compose.minimized) {
+    return (
+      <button
+        onClick={() => setComposeMinimized(false)}
+        className={`fixed bottom-0 z-40 flex w-72 items-center justify-between gap-2 rounded-t-xl border border-b-0 border-zinc-200 bg-white px-4 py-2.5 text-left shadow-lg transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800 ${rightOffset}`}
+        title="Restore"
+      >
+        <span className="min-w-0 flex-1 truncate text-sm font-medium text-zinc-700 dark:text-zinc-200">
+          {compose.draft.subject?.trim() || title}
+        </span>
+        <span className="flex items-center gap-0.5 text-zinc-400">
+          <ExpandIcon className="h-4 w-4" />
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              e.stopPropagation();
+              closeCompose();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.stopPropagation();
+                closeCompose();
+              }
+            }}
+            className="rounded p-0.5 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700"
+            title="Discard"
+          >
+            <XIcon className="h-4 w-4" />
+          </span>
+        </span>
+      </button>
+    );
+  }
 
   const onSend = () => {
     if (send.isPending || compose.animating) return;
@@ -26,33 +68,34 @@ export function ComposeModal() {
 
   return (
     <div
-      // Clicking anywhere in the card while the assistant is typing snaps
-      // the animation to the finished draft — never fight the user.
+      // Clicking anywhere in the card while the assistant is typing snaps the
+      // animation to the finished draft — never fight the user.
       onMouseDownCapture={() => compose.animating && setComposeAnimating(false)}
-      // When the assistant panel is open, the card slides left of it so the
-      // two never overlap (panel is 380px wide + 1rem gap).
-      className={`fixed bottom-4 z-40 flex w-[min(560px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900 ${
-        assistantOpen ? "right-99" : "right-4"
-      }`}
+      className={`fixed bottom-4 z-40 flex max-h-[calc(100vh-6rem)] w-[min(580px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900 ${rightOffset}`}
     >
-      <div className="flex items-center justify-between bg-zinc-100 px-4 py-2.5 dark:bg-zinc-800">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
-          {compose.animating
-            ? "Assistant is drafting…"
-            : compose.replyTo
-              ? "Reply"
-              : "New message"}
+      <div className="flex items-center justify-between bg-zinc-900 px-4 py-2.5 text-zinc-100 dark:bg-zinc-800">
+        <span className="text-sm font-medium">
+          {compose.animating ? "Assistant is drafting…" : title}
         </span>
-        <button
-          onClick={closeCompose}
-          className="rounded-md p-1 text-zinc-400 transition hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700"
-          title="Discard"
-        >
-          <XIcon />
-        </button>
+        <div className="flex items-center gap-0.5">
+          <button
+            onClick={() => setComposeMinimized(true)}
+            className="rounded-md p-1 text-zinc-400 transition hover:bg-white/10 hover:text-zinc-100"
+            title="Minimize"
+          >
+            <MinimizeIcon />
+          </button>
+          <button
+            onClick={closeCompose}
+            className="rounded-md p-1 text-zinc-400 transition hover:bg-white/10 hover:text-zinc-100"
+            title="Discard"
+          >
+            <XIcon />
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
+      <div className="flex min-h-0 flex-1 flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
         <Field
           label="To"
           value={compose.draft.to}
@@ -78,9 +121,9 @@ export function ComposeModal() {
           value={compose.draft.body}
           onChange={(e) => updateDraft({ body: e.target.value })}
           placeholder="Write your message…"
-          rows={10}
+          rows={9}
           data-compose-field="body"
-          className="w-full resize-none bg-transparent px-4 py-3 text-sm outline-none placeholder:text-zinc-400"
+          className="min-h-32 flex-1 resize-none bg-transparent px-4 py-3 text-sm leading-relaxed outline-none placeholder:text-zinc-400"
         />
       </div>
 
@@ -98,7 +141,7 @@ export function ComposeModal() {
             {send.error instanceof Error ? send.error.message : "Send failed"}
           </span>
         )}
-        {compose.replyTo && (
+        {compose.replyTo && !send.isError && (
           <span className="text-xs text-zinc-400">Replying in thread</span>
         )}
       </div>
