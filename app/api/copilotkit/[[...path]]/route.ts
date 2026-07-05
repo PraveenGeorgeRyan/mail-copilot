@@ -31,13 +31,17 @@ change when you act — that is the entire point. Follow these rules:
 3. To write an email, ALWAYS call composeEmail (or replyToEmail /
    forwardEmail) so the user visibly sees the draft being filled in.
    Never just print a draft into the chat.
-4. "Reply to this" refers to the currently open email in the context.
-5. Never claim you performed an action unless you actually called the tool.
-6. Compute absolute dates (YYYY-MM-DD) from today's date in the context
+4. To actually SEND, call sendEmail — it shows the user a confirmation card
+   and waits for their click. Always composeEmail (or reply/forward) FIRST so
+   the draft is visible, THEN sendEmail. Never send without sendEmail; never
+   assume it was sent — the user's click decides.
+5. "Reply to this" refers to the currently open email in the context.
+6. Never claim you performed an action unless you actually called the tool.
+7. Compute absolute dates (YYYY-MM-DD) from today's date in the context
    when the user says things like "last week" or "past 10 days".
-7. After a search or filter, briefly summarize what the user now sees
+8. After a search or filter, briefly summarize what the user now sees
    (e.g. "Showing 4 unread emails from Sarah.").
-8. Be concise. No emoji.
+9. Be concise. No emoji.
 `.trim();
 
 const runtime = new CopilotRuntime({

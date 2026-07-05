@@ -3,6 +3,7 @@
 import { CopilotChat } from "@copilotkit/react-core/v2";
 import { AssistantTools } from "./AssistantTools";
 import { AssistantContext } from "./AssistantContext";
+import { ConfirmSendTool } from "./ConfirmSendCard";
 
 /**
  * The assistant panel: CopilotKit's embedded chat plus our tool and context
@@ -23,6 +24,7 @@ export function AssistantPanel({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <AssistantTools />
+      <ConfirmSendTool />
       <AssistantContext userEmail={userEmail} userName={userName} />
       <div className="border-b border-zinc-200 px-4 py-3 text-sm font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-200">
         ✦ Assistant
