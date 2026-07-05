@@ -10,8 +10,9 @@ import type { SyncResponse } from "@/lib/types";
  * When Gmail reports changes, invalidate the React Query caches so the
  * inbox re-renders — new mail appears with no manual refresh.
  *
- * Day 3 layers Pub/Sub push on top: a Pusher ping triggers the exact same
- * refetch immediately, and this poll remains as the automatic fallback.
+ * This is the guaranteed baseline. A push tier (Gmail users.watch → Pub/Sub →
+ * webhook → browser) could trigger the same refetch in ~1s; this poll would
+ * then stay on as the automatic fallback. See the README trade-offs section.
  */
 export function useMailSync() {
   const queryClient = useQueryClient();
