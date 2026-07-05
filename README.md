@@ -8,8 +8,12 @@ and visibly fills in; say *"show unread emails from this week"* and the real inb
 Built on the **Gmail API** with Google sign-in, so it operates on real mail — reading,
 searching, sending, and replying with correct threading.
 
-> **Live demo:** _<add your Vercel URL here>_
+> **Live demo:** https://mail-copilot-red.vercel.app
 > **Demo video:** _<add link here>_ — shows the assistant driving the UI end-to-end.
+>
+> _Note: Google OAuth is in Testing mode, so live sign-in is limited to approved test
+> users. The demo video shows the full flow end-to-end; to trial the live app, request
+> test-user access._
 
 ![Mail Copilot screenshot](docs/screenshot-main.png)
 
