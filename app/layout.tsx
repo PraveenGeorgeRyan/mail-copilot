@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { themeInitScript } from "@/components/theme";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,6 +31,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="h-full">
+        {/* Runs before paint so the theme never flashes on load. */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <Providers>{children}</Providers>
       </body>
     </html>

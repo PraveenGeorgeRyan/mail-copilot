@@ -12,6 +12,7 @@ import { EmailList } from "./EmailList";
 import { EmailDetail } from "./EmailDetail";
 import { ComposeModal } from "./ComposeModal";
 import { MailOpenIcon } from "./icons";
+import { ThemeToggle } from "@/components/theme";
 
 export function MailApp({
   userEmail,
@@ -43,6 +44,7 @@ export function MailApp({
             {userName ? `${userName} · ` : ""}
             {userEmail}
           </span>
+          <ThemeToggle />
           <button
             onClick={toggleAssistant}
             className={`rounded-lg border px-3 py-1.5 text-sm transition ${
