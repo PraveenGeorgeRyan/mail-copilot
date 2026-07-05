@@ -181,8 +181,14 @@ store's filters) refetches and the UI re-renders.
 ## Testing
 
 ```bash
+npm test        # 29 unit tests (Vitest) over the pure mail-service core
 npm run build   # type-check + production build
 ```
+
+Tests focus on the logic worth locking down — Gmail query building, MIME
+construction (including reply threading and header-injection safety), and
+payload parsing — because those pure functions in `lib/gmail/` are where a
+subtle bug would silently corrupt real mail.
 
 ---
 
