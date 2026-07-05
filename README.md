@@ -9,11 +9,11 @@ Built on the **Gmail API** with Google sign-in, so it operates on real mail — 
 searching, sending, and replying with correct threading.
 
 > **Live demo:** https://mail-copilot-red.vercel.app
-> **Demo video:** _<add link here>_ — shows the assistant driving the UI end-to-end.
+> A screen-recording walkthrough of the assistant driving the UI is included with the
+> submission.
 >
 > _Note: Google OAuth is in Testing mode, so live sign-in is limited to approved test
-> users. The demo video shows the full flow end-to-end; to trial the live app, request
-> test-user access._
+> users. To trial the live app, request test-user access._
 
 ![Mail Copilot screenshot](docs/screenshot-main.png)
 
